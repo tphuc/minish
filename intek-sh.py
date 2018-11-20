@@ -24,8 +24,10 @@ def printenv(var):
     if var in os.environ.keys():
         print(os.environ[var])
 while True:
-    raw_input = input(PROMPT)
+    raw_input = prompt_input()
+
     if raw_input == 'exit':
+        print('exit')
         break
 
     args = raw_input.split()
@@ -48,7 +50,10 @@ while True:
         print("exit")
         break
     
-
-    
-
+def prompt_input():
+    try:
+        raw_input = input(PROMPT)
+    except (EOFError):
+        return 'exit'
+    return raw_input
 
