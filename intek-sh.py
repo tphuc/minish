@@ -19,41 +19,68 @@ def export(string):
     os.environ[args[0]] = args[1]
 
 def unset(var):
-    os.environ.pop(var) 
-def printenv(var):
+    try:
+        os.environ.pop(var)
+    except (KeyError):
+        return
+
+def printenv(var='all'):
+    if var == 'all':
+        dict_ = dict(os.environ)
+        for k,v in dict_.items():
+            print(k+'='+v)
+        return
     if var in os.environ.keys():
         print(os.environ[var])
-while True:
-    raw_input = prompt_input()
-
-    if raw_input == 'exit':
-        print('exit')
-        break
-
-    args = raw_input.split()
-    command = args[0]
-
-    if command == 'cd':
-        if len(args) > 1:
-            cd(args[1])
-        else:
-            CURRENT_DIR = os.environ['HOME']
-    elif command == 'pwd':
-        print(CURRENT_DIR)
-    elif command == 'export':
-        export(args[1])
-    elif command == 'unset':
-        unset(args[1])
-    elif command == 'printenv':
-        printenv(args[1])
-    elif command == 'exit':
-        print("exit")
-        break
     
+
+
 def prompt_input():
     try:
         raw_input = input(PROMPT)
     except (EOFError):
-        return 'exit'
+        return None
     return raw_input
 
+def main():
+    while True:
+        raw_input = prompt_input()
+
+        if raw_input == None:
+            break
+
+        if raw_input == 'exit':
+            print('exit')
+            break
+
+
+        args = raw_input.split()
+        command = args[0]
+
+        if command == 'cd':
+            if len(args) > 1:
+                cd(args[1])
+            else:
+                try:
+                    CURRENT_DIR = os.environ['HOME']
+                except (KeyError):
+                    print("intek-sh: cd: HOME not set")
+        elif command == 'pwd':
+            print(CURRENT_DIR)
+        elif command == 'export':
+            export(args[1])
+        elif command == 'unset':
+            unset(args[1])
+        elif command == 'printenv':
+            try:
+                printenv(args[1])
+            except (IndexError):
+                printenv()
+        elif command == 'exit':
+            print("exit")
+            break
+    
+
+
+if __name__ == '__main__':
+    main()
