@@ -19,7 +19,6 @@ def get_tree(current_dir=None):
         return tree
 
 def execute(args):
-    fileExe = None
     found = None
     filepath = " ".join(args)
     if filepath.startswith('./'):
@@ -35,14 +34,13 @@ def execute(args):
                         found = file
         except (KeyError):
             pass
-    if os.access(found, os.X_OK):
-        fileExe = found
+    
 
     if found is not None:
-        if fileExe is None:
-            print("intek-sh:",filepath+':','Permission denied')
+        if not os.access(found, os.X_OK):
+            print("intek-sh:",found+':','Permission denied')
         else:
-            subprocess.run(fileExe)
+            subprocess.run(found)
 
     else:
         print("intek-sh:",filepath+':','command not found')
@@ -67,7 +65,7 @@ def cd(args):
 
 def export(string):
     args = string
-    print(args)
+
     for arg in args:
         pair = arg.split('=')
         try:
