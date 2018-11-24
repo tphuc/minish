@@ -18,26 +18,34 @@ def get_tree(current_dir=None):
                     tree.append(entry)
         return tree
 
-def execute(filepath):
+def execute(args):
     fileExe = None
+    found = None
+    filepath = " ".join(args)
     if filepath.startswith('./'):
         for file in get_tree(CURRENT_DIR):
             if file[file.rfind('/'):] == filepath[1:]:
-                if os.access(file, os.X_OK):
-                    fileExe = file
+                found = file
     else:
-        allpaths = os.environ['PATH'].split(':')
-        for path in allpaths:
-            for file in get_tree(path):
-                if file[file.rfind('/')+1:] == filepath:
-                    if os.access(file, os.X_OK):
-                        fileExe = file
+        try:
+            allpaths = os.environ['PATH'].split(':')
+            for path in allpaths:
+                for file in get_tree(path):
+                    if file[file.rfind('/')+1:] == filepath:
+                        found = file
+        except (KeyError):
+            pass
+    if os.access(found, os.X_OK):
+        fileExe = found
 
-    if fileExe == None:
-        print("bash:",filepath+':','command not found')
+    if found is not None:
+        if fileExe is None:
+            print("intek-sh:",filepath+':','Permission denied')
+        else:
+            subprocess.run(fileExe)
+
     else:
-        popen = subprocess.Popen(fileExe)
-        popen.wait()
+        print("intek-sh:",filepath+':','command not found')
     return
 
 
@@ -58,10 +66,14 @@ def cd(args):
             print("intek-sh: cd: HOME not set")
 
 def export(string):
-    args = string.split()
+    args = string
+    print(args)
     for arg in args:
         pair = arg.split('=')
-        os.environ[pair[0]] = pair[1]
+        try:
+            os.environ[pair[0]] = pair[1]
+        except (IndexError):
+            os.environ[pair[0]] = ''
 
 def unset(var):
     try:
@@ -121,7 +133,7 @@ def main():
             elif command == 'exit':
                 exits(args)
             else:
-                pass
+                execute(args)
         except (IndexError):
             pass
 
