@@ -29,7 +29,11 @@ def execute(args):
 
     if found is not None:
         if not os.access(found, os.X_OK):
+<<<<<<< HEAD
             print("intek-sh:",filepath+':','Permission denied')
+=======
+            print("intek-sh:",found+':','Permission denied')
+>>>>>>> 981045240c14840f8f4c4b59d29b6ae2df05f621
         else:
             subprocess.run(found)
 
