@@ -6,43 +6,32 @@ from os import access, scandir
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 PROMPT = "intek-sh$ "
 
-def get_tree(current_dir=None):
-        """ create a list of all files """
-        tree = []
-        for entry in os.scandir(current_dir):
-            entry = entry.name
-            tree.append(current_dir + '/' + entry)
-            "Check if entry is a Sub Directory"
-            if os.path.isdir(current_dir + '/' + entry) is True:
-                for entry in get_tree(current_dir + '/' + entry):
-                    tree.append(entry)
-        return tree
 
 def execute(args):
-    fileExe = None
     found = None
     filepath = " ".join(args)
     if filepath.startswith('./'):
-        for file in get_tree(CURRENT_DIR):
-            if file[file.rfind('/'):] == filepath[1:]:
-                found = file
+        for file in os.scandir(CURRENT_DIR):
+            file = file.name
+            if file.endswith(filepath[2:]):
+                found = filepath
     else:
         try:
             allpaths = os.environ['PATH'].split(':')
             for path in allpaths:
-                for file in get_tree(path):
-                    if file[file.rfind('/')+1:] == filepath:
+                for file in os.scandir(path):
+                    file = file.name
+                    if file.endswith(filepath):
                         found = file
         except (KeyError):
             pass
-    if os.access(found, os.X_OK):
-        fileExe = found
+    
 
     if found is not None:
-        if fileExe is None:
+        if not os.access(found, os.X_OK):
             print("intek-sh:",filepath+':','Permission denied')
         else:
-            subprocess.run(fileExe)
+            subprocess.run(found)
 
     else:
         print("intek-sh:",filepath+':','command not found')
@@ -67,7 +56,7 @@ def cd(args):
 
 def export(string):
     args = string
-    print(args)
+
     for arg in args:
         pair = arg.split('=')
         try:
@@ -132,6 +121,7 @@ def main():
                 printenv(args)
             elif command == 'exit':
                 exits(args)
+                break
             else:
                 execute(args)
         except (IndexError):
